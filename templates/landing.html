@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineSpark | Next-Gen Movie AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+<style>
+    .landing-hero {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 0 5%;
+    }
+    
+    .landing-title {
+        font-size: 6rem;
+        font-weight: 800;
+        line-height: 1.1;
+        background: linear-gradient(to right, #fff, var(--accent-cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        animation: fadeInUp 1s ease-out forwards;
+    }
+    
+    .landing-subtitle {
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        max-width: 800px;
+        margin-bottom: 40px;
+        animation: fadeInUp 1s ease-out 0.2s forwards;
+        opacity: 0;
+    }
+    
+    .landing-actions {
+        display: flex;
+        gap: 20px;
+        animation: fadeInUp 1s ease-out 0.4s forwards;
+        opacity: 0;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        padding: 100px 5%;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .feature-card {
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: var(--accent-red);
+        text-shadow: 0 0 20px rgba(255,0,85,0.5);
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .auth-buttons-nav {
+        display: flex;
+        gap: 15px;
+    }
+</style>
+</head>
+<body>
+
+<div class="dynamic-bg"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+
+<nav class="glass-navbar" id="navbar">
+    <div class="logo"><span>Cine</span>Spark <i class="fa-solid fa-bolt"></i></div>
+    
+    <div class="auth-buttons-nav">
+        <a href="{{ url_for('login') }}" class="btn btn-glass" style="padding: 10px 25px; font-size:1rem;">Log In</a>
+        <a href="{{ url_for('register') }}" class="btn btn-neon" style="padding: 10px 25px; font-size:1rem;">Get Started</a>
+    </div>
+</nav>
+
+<div class="landing-hero">
+    <h1 class="landing-title">Enter The Cinematic Matrix</h1>
+    <p class="landing-subtitle">CineSpark utilizes state-of-the-art unstructured machine learning to analyze movie metadata, tags, and genres to deliver precise, intelligent recommendations that match your exact movie frequency.</p>
+    
+    <div class="landing-actions">
+        <a href="{{ url_for('register') }}" class="btn btn-neon" style="font-size: 1.3rem; padding: 20px 50px;">Initialize AI <i class="fa-solid fa-microchip" style="margin-left:10px;"></i></a>
+    </div>
+</div>
+
+<div class="features-grid">
+    <div class="feature-card glass-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.2">
+        <i class="fa-solid fa-brain feature-icon"></i>
+        <h3 class="feature-title">Neural Matching</h3>
+        <p style="color: #a3a3a3; line-height:1.6;">Our algorithm doesn't just guess. It scans comprehensive TMDB metadata, correlating thousands of features to perfectly match your search to related movies.</p>
+    </div>
+    
+    <div class="feature-card glass-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.2">
+        <i class="fa-solid fa-cubes feature-icon" style="color: var(--accent-cyan);"></i>
+        <h3 class="feature-title">Massive Data Pipeline</h3>
+        <p style="color: #a3a3a3; line-height:1.6;">Backed by a meticulously structured massive dataset of over 45,000 films, granting you unparalleled access to both blockbusters and indie gems.</p>
+    </div>
+    
+    <div class="feature-card glass-card" data-tilt data-tilt-max="5" data-tilt-glare data-tilt-max-glare="0.2">
+        <i class="fa-solid fa-wand-magic-sparkles feature-icon" style="color: var(--accent-purple);"></i>
+        <h3 class="feature-title">Energetic UI Design</h3>
+        <p style="color: #a3a3a3; line-height:1.6;">A modern, deep dark-mode aesthetic utilizing glassmorphism and real-time hover physics to ensure exploring movies is a visual treat.</p>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 CineSpark. Designed with Energy & Code.</p>
+</footer>
+
+<script>
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+</script>
+
+</body>
+</html>

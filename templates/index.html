@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineSpark | Energetic & AI-Powered</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+</head>
+<body>
+
+<div class="dynamic-bg"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+<div class="glow-orb orb3"></div>
+
+<nav class="glass-navbar" id="navbar">
+    <div class="logo fadeInDown" onclick="window.location.href='/'"><span>Cine</span>Spark <i class="fa-solid fa-bolt"></i></div>
+    
+    <form method="POST" class="search-form fadeInDown delay-1">
+        <input type="text" name="movie" placeholder="Search a masterpiece..." value="{{ movie_name }}">
+        <select name="genre">
+            <option value="">Any Genre</option>
+            <option {% if genre == 'Action' %}selected{% endif %}>Action</option>
+            <option {% if genre == 'Adventure' %}selected{% endif %}>Adventure</option>
+            <option {% if genre == 'Animation' %}selected{% endif %}>Animation</option>
+            <option {% if genre == 'Comedy' %}selected{% endif %}>Comedy</option>
+            <option {% if genre == 'Drama' %}selected{% endif %}>Drama</option>
+            <option {% if genre == 'Horror' %}selected{% endif %}>Horror</option>
+            <option {% if genre == 'Romance' %}selected{% endif %}>Romance</option>
+            <option {% if genre == 'Science Fiction' %}selected{% endif %}>Science Fiction</option>
+            <option {% if genre == 'Thriller' %}selected{% endif %}>Thriller</option>
+        </select>
+        <button type="submit" class="glow-btn"><i class="fa-solid fa-compass"></i> Discover</button>
+    </form>
+    
+    <div class="user-nav" style="display:flex; align-items:center; gap:20px;">
+        <span class="user-badge" style="color:var(--text-secondary); font-weight:600;"><i class="fa-solid fa-user" style="color:var(--accent-cyan); margin-right:5px;"></i> {{ current_user.username }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-glass" style="padding: 8px 20px; font-size:0.9rem; text-decoration:none;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</nav>
+
+{% if not is_search %}
+    <div class="hero fade-in-up">
+        <div class="hero-backdrop" style="background-image: url('{{ featured.backdrop }}');"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-glass-card" data-tilt data-tilt-max="2" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.5">
+            <div class="hero-badge">#1 Trending Worldwide</div>
+            <h1 class="hero-title">{{ featured.title }}</h1>
+            <div class="hero-meta">
+                <span class="rating glow-text"><i class="fa-solid fa-star"></i> {{ featured.rating }}</span>
+                <span class="year">{{ featured.year }}</span>
+                <span class="tag">Blockbuster</span>
+            </div>
+            <p class="hero-overview">{{ featured.overview }}</p>
+            <div class="hero-buttons">
+                <button class="btn btn-neon" onclick="watchTrailer('{{ featured.title|replace("'", "\\'") }}')"><i class="fa-solid fa-play"></i> Watch Trailer</button>
+                <button class="btn btn-glass" onclick="openModal('{{ featured.title|replace("'", "\\'") }}', '{{ featured.poster }}', '{{ featured.backdrop }}', '{{ featured.overview|replace("'", "\\'") }}', '{{ featured.rating }}', '{{ featured.year }}')"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Details</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorized Rows with Glassmorphism -->
+    <div class="rows-container">
+        
+        <div class="row-header">
+            <h2 class="row-title glow-text"><i class="fa-solid fa-fire"></i> Hot & Trending</h2>
+            <div class="line-deco"></div>
+        </div>
+        <div class="movie-row">
+            {% for movie in trending %}
+            <div class="movie-card glass-card" onclick="openModal('{{ movie.title|replace("'", "\\'") }}', '{{ movie.poster }}', '{{ movie.backdrop }}', '{{ movie.overview|replace("'", "\\'") }}', '{{ movie.rating }}', '{{ movie.year }}')" data-tilt data-tilt-max="10" data-tilt-speed="400">
+                <img src="{{ movie.poster }}" alt="{{ movie.title }}" onerror="fixBrokenPoster(this, this.getAttribute('alt'))">
+                <div class="card-info">
+                    <h4>{{ movie.title }}</h4>
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> {{ movie.rating }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row-header">
+            <h2 class="row-title glow-text"><i class="fa-solid fa-crown"></i> Hall of Fame</h2>
+            <div class="line-deco"></div>
+        </div>
+        <div class="movie-row">
+            {% for movie in top_rated %}
+            <div class="movie-card glass-card" onclick="openModal('{{ movie.title|replace("'", "\\'") }}', '{{ movie.poster }}', '{{ movie.backdrop }}', '{{ movie.overview|replace("'", "\\'") }}', '{{ movie.rating }}', '{{ movie.year }}')" data-tilt data-tilt-max="10" data-tilt-speed="400">
+                <img src="{{ movie.poster }}" alt="{{ movie.title }}" onerror="fixBrokenPoster(this, this.getAttribute('alt'))">
+                <div class="card-info">
+                    <h4>{{ movie.title }}</h4>
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> {{ movie.rating }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="row-header">
+            <h2 class="row-title glow-text"><i class="fa-solid fa-explosion"></i> Action Packed</h2>
+            <div class="line-deco"></div>
+        </div>
+        <div class="movie-row">
+            {% for movie in action_movies %}
+            <div class="movie-card glass-card" onclick="openModal('{{ movie.title|replace("'", "\\'") }}', '{{ movie.poster }}', '{{ movie.backdrop }}', '{{ movie.overview|replace("'", "\\'") }}', '{{ movie.rating }}', '{{ movie.year }}')" data-tilt data-tilt-max="10" data-tilt-speed="400">
+                <img src="{{ movie.poster }}" alt="{{ movie.title }}" onerror="fixBrokenPoster(this, this.getAttribute('alt'))">
+                <div class="card-info">
+                    <h4>{{ movie.title }}</h4>
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> {{ movie.rating }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="massive-gallery-section" style="margin-top: 50px;">
+        <div class="row-header" style="justify-content: center; text-align: center; margin-bottom: 40px;">
+            <h2 class="row-title glow-text" style="font-size: 3rem;"><i class="fa-solid fa-globe"></i> Explore The Cinematic Universe</h2>
+            <p style="color:#a3a3a3; font-size:1.2rem; margin-top:10px;">Endless posters of movies to dive into.</p>
+        </div>
+        <div class="massive-grid">
+            {% for movie in gallery_movies %}
+            <div class="movie-card glass-card massive-card" onclick="openModal('{{ movie.title|replace("'", "\\'") }}', '{{ movie.poster }}', '{{ movie.backdrop }}', '{{ movie.overview|replace("'", "\\'") }}', '{{ movie.rating }}', '{{ movie.year }}')">
+                <img src="{{ movie.poster }}" alt="{{ movie.title }}" loading="lazy" onerror="fixBrokenPoster(this, this.getAttribute('alt'))">
+                <div class="card-info">
+                    <h4>{{ movie.title }}</h4>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% else %}
+    <div class="results-container">
+        <h2 class="section-title glow-text">AI Discovery for: <span>"{{ movie_name }} {{ genre }}"</span></h2>
+        
+        <div class="orb-pulsate" style="margin-bottom:30px;"></div>
+        
+        {% if recommendations %}
+            <div class="massive-grid">
+                {% for movie in recommendations %}
+                <div class="movie-card glass-card massive-card" onclick="openModal('{{ movie.title|replace("'", "\\'") }}', '{{ movie.poster }}', '{{ movie.backdrop }}', '{{ movie.overview|replace("'", "\\'") }}', '{{ movie.rating }}', '{{ movie.year }}')" data-tilt data-tilt-max="15">
+                    <img src="{{ movie.poster }}" alt="{{ movie.title }}" onerror="fixBrokenPoster(this, this.getAttribute('alt'))">
+                    <div class="card-info">
+                        <h4>{{ movie.title }}</h4>
+                        <span class="rating-badge"><i class="fa-solid fa-star"></i> {{ movie.rating }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results glass-card" style="padding: 100px 20px;">
+                <i class="fa-solid fa-ghost" style="font-size: 60px; margin-bottom:20px; color:#ff007b; text-shadow: 0 0 20px #ff007b;"></i>
+                <h3 style="font-size: 2rem; color: #fff;">The AI found nothing in this dimension.</h3>
+                <p style="font-size: 1.2rem; color: #a3a3a3; margin-top: 10px;">Try another title, or explore a different genre.</p>
+                <button class="btn btn-neon" style="margin-top:30px; display:inline-block;" onclick="window.location.href='/'">Return to Matrix</button>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+<footer>
+    <p>&copy; 2026 CineSpark. Designed with Energy & Code.</p>
+</footer>
+
+<div id="movieModal" class="modal">
+    <div class="modal-content glass-card blur-heavy">
+        <span class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></span>
+        <div class="modal-bg" id="modalBg"></div>
+        <div class="modal-body-container" style="display: flex; gap: 40px; margin-top: -180px; padding: 40px; position: relative; z-index: 2;">
+            <div class="modal-poster" id="modalPosterContainer" style="flex-shrink: 0; width: 220px; display: none;">
+                <img id="modalPosterImg" src="" alt="Poster" style="width: 100%; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.9); border: 2px solid rgba(255,255,255,0.15);" onerror="fixBrokenPoster(this, document.getElementById('modalTitle').innerText)">
+            </div>
+            <div class="modal-info" style="margin-top: 0; padding: 0;">
+                <h2 id="modalTitle" class="glow-text">Title</h2>
+                <div class="hero-meta" style="margin-bottom: 20px;">
+                    <span class="rating-badge" style="font-size: 1.2rem; padding: 5px 15px;"><i class="fa-solid fa-star"></i> <span id="modalRating">9.0</span></span>
+                    <span class="year" id="modalYear">2023</span>
+                    <span class="tag">Cinematic Experience</span>
+                </div>
+                <p id="modalOverview">Overview</p>
+                <div class="hero-buttons" style="margin-top: 30px;">
+                    <button class="btn btn-neon" id="modalTrailerBtn"><i class="fa-solid fa-play"></i> Watch Trailer</button>
+                    <button class="btn btn-glass" onclick="closeModal()"><i class="fa-solid fa-plus"></i> Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function watchTrailer(title) {
+        document.body.style.cursor = 'wait';
+        try {
+            const response = await fetch('/api/trailer/' + encodeURIComponent(title));
+            const data = await response.json();
+            
+            if (data.videoId) {
+                const videoModalHtml = `
+                    <div id="videoModalOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:99999; display:flex; justify-content:center; align-items:center; opacity:0; transition:opacity 0.3s ease;">
+                        <iframe style="width:80%; max-width:1200px; aspect-ratio:16/9; border-radius:12px; box-shadow:0 0 40px var(--accent-pink);" src="https://www.youtube.com/embed/${data.videoId}?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <span onclick="this.parentElement.remove()" style="position:absolute; top:30px; right:40px; color:#fff; font-size:40px; cursor:pointer; text-shadow:0 0 10px #fff;"><i class="fa-solid fa-xmark"></i></span>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', videoModalHtml);
+                setTimeout(() => { document.getElementById('videoModalOverlay').style.opacity = '1'; }, 10);
+            } else {
+                window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(title + ' official trailer'), '_blank');
+            }
+        } catch(e) {
+            console.error(e);
+            window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(title + ' official trailer'), '_blank');
+        } finally {
+            document.body.style.cursor = 'default';
+        }
+    }
+
+    function openModal(title, poster, backdrop, overview, rating, year) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalOverview').innerText = overview;
+        document.getElementById('modalRating').innerText = rating;
+        document.getElementById('modalYear').innerText = year;
+        
+        const posterContainer = document.getElementById('modalPosterContainer');
+        const posterImg = document.getElementById('modalPosterImg');
+        if (poster && poster !== 'undefined' && poster !== '') {
+            posterImg.src = poster;
+            posterContainer.style.display = 'block';
+        } else {
+            posterContainer.style.display = 'none';
+        }
+
+        document.getElementById('modalTrailerBtn').onclick = function() {
+            watchTrailer(title);
+        };
+        
+        document.getElementById('modalBg').style.backgroundImage = "linear-gradient(to top, rgba(15,10,25,1), rgba(15,10,25,0.8), transparent), url('" + backdrop + "')";
+        
+        const modal = document.getElementById('movieModal');
+        modal.style.display = 'flex';
+        setTimeout(() => { modal.style.opacity = '1'; }, 10);
+        document.body.style.overflow = 'hidden'; 
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('movieModal');
+        modal.style.opacity = '0';
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+        document.body.style.overflow = 'auto';
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('movieModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    async function fixBrokenPoster(img, title) {
+        if (img.dataset.fallbackAttempted) return;
+        img.dataset.fallbackAttempted = "true";
+        
+        try {
+            const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(title + ' film')}&utf8=&format=json&origin=*`;
+            const searchRes = await fetch(searchUrl);
+            const searchData = await searchRes.json();
+            
+            if (searchData.query.search.length > 0) {
+                const wikiTitle = searchData.query.search[0].title;
+                const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}?origin=*`;
+                const summaryRes = await fetch(summaryUrl);
+                const summaryData = await summaryRes.json();
+                
+                if (summaryData.thumbnail && summaryData.thumbnail.source) {
+                    const hdImageUrl = summaryData.thumbnail.source.replace(/\/\d+px-/, '/500px-');
+                    img.src = hdImageUrl;
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('Wiki fallback failed:', e);
+        }
+        
+        img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(title)}&background=140a1e&color=fff&size=500`;
+    }
+
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+</script>
+
+</body>
+</html>

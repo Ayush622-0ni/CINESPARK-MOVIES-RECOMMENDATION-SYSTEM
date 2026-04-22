@@ -1,0 +1,11 @@
+flask
+pandas
+numpy
+scikit-learn
+requests
+python-dotenv
+Flask-SQLAlchemy
+Flask-Login
+PyMySQL
+gunicorn
+psycopg2-binary
