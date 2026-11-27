@@ -12,7 +12,9 @@ custom_db_url = os.environ.get('DATABASE_URL')
 
 if custom_db_url:
     if custom_db_url.startswith('postgres://'):
-        custom_db_url = custom_db_url.replace('postgres://', 'postgresql://', 1)
+        custom_db_url = custom_db_url.replace('postgres://', 'postgresql+psycopg2://', 1)
+    elif custom_db_url.startswith('postgresql://'):
+        custom_db_url = custom_db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
     db_url = custom_db_url
 else:
     try:
