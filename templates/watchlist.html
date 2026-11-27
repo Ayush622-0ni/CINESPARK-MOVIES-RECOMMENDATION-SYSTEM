@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Library | CineSpark</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+</head>
+<body>
+
+<div class="dynamic-bg"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+<div class="glow-orb orb3"></div>
+
+<nav class="glass-navbar scrolled" id="navbar">
+    <div class="logo fadeInDown" onclick="window.location.href='/discover'"><span>Cine</span>Spark <i class="fa-solid fa-bolt"></i></div>
+    
+    <div style="display:flex; align-items:center; gap:20px;">
+        <a href="{{ url_for('discover') }}" class="btn btn-glass" style="padding: 10px 22px; text-decoration:none;"><i class="fa-solid fa-compass"></i> Discover</a>
+        <span class="user-badge" style="color:var(--text-secondary); font-weight:600;"><i class="fa-solid fa-user" style="color:var(--accent-cyan); margin-right:5px;"></i> {{ current_user.username }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-glass" style="padding: 10px 20px; font-size:0.9rem; text-decoration:none;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</nav>
+
+<div class="watchlist-page-container">
+    <div class="watchlist-header fade-in-up">
+        <h1 class="glow-text">My Personal <span style="color:var(--accent-cyan);">Library</span></h1>
+        <p style="color:var(--text-secondary); font-size:1.1rem;">Your curated watchlist and favorite movies fuel your personalized recommendations.</p>
+    </div>
+
+    <div class="watchlist-tabs fade-in-up delay-1">
+        <button class="tab-btn active" onclick="switchTab('watchlistTab', this)">
+            <i class="fa-solid fa-bookmark"></i> Watchlist ({{ watchlists|length }})
+        </button>
+        <button class="tab-btn" onclick="switchTab('favoritesTab', this)">
+            <i class="fa-solid fa-heart" style="color:var(--accent-red);"></i> Liked Movies ({{ favorites|length }})
+        </button>
+    </div>
+
+    <!-- Watchlist Tab Content -->
+    <div id="watchlistTab" class="tab-content active">
+        {% if watchlists %}
+            {% for item in watchlists %}
+            <div class="movie-card glass-card" data-title="{{ item.title }}" data-tilt data-tilt-max="8" data-tilt-speed="400">
+                <div class="card-actions" style="opacity:1;">
+                    <div class="action-btn-circle watchlisted" onclick="removeWatchlist('{{ item.title|replace("'", "\\'") }}', this)" title="Remove from Watchlist">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                </div>
+                <img src="{{ item.poster }}" alt="{{ item.title }}" onclick="openModal('{{ item.title|replace("'", "\\'") }}', '{{ item.poster }}', '{{ item.backdrop }}', '{{ item.overview|replace("'", "\\'") }}', '{{ item.rating }}', '{{ item.year }}')">
+                <div class="card-info" onclick="openModal('{{ item.title|replace("'", "\\'") }}', '{{ item.poster }}', '{{ item.backdrop }}', '{{ item.overview|replace("'", "\\'") }}', '{{ item.rating }}', '{{ item.year }}')">
+                    <h4>{{ item.title }}</h4>
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> {{ item.rating }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-bookmark"></i>
+                <h3>Your Watchlist is Empty</h3>
+                <p>Browse through trending movies or search your favorites to add them here.</p>
+                <a href="{{ url_for('discover') }}" class="btn btn-neon" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;"><i class="fa-solid fa-compass"></i> Discover Movies</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Favorites Tab Content -->
+    <div id="favoritesTab" class="tab-content">
+        {% if favorites %}
+            {% for item in favorites %}
+            <div class="movie-card glass-card" data-title="{{ item.title }}" data-tilt data-tilt-max="8" data-tilt-speed="400">
+                <div class="card-actions" style="opacity:1;">
+                    <div class="action-btn-circle favorited" onclick="removeFavorite('{{ item.title|replace("'", "\\'") }}', this)" title="Remove from Favorites">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+                <img src="{{ item.poster }}" alt="{{ item.title }}" onclick="openModal('{{ item.title|replace("'", "\\'") }}', '{{ item.poster }}', '{{ item.backdrop }}', '{{ item.overview|replace("'", "\\'") }}', '{{ item.rating }}', '{{ item.year }}')">
+                <div class="card-info" onclick="openModal('{{ item.title|replace("'", "\\'") }}', '{{ item.poster }}', '{{ item.backdrop }}', '{{ item.overview|replace("'", "\\'") }}', '{{ item.rating }}', '{{ item.year }}')">
+                    <h4>{{ item.title }}</h4>
+                    <span class="rating-badge"><i class="fa-solid fa-star"></i> {{ item.rating }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-heart" style="color:var(--accent-red);"></i>
+                <h3>No Liked Movies Yet</h3>
+                <p>Like movies you love to help CineSpark's ML model curate recommendations tailored to your taste!</p>
+                <a href="{{ url_for('discover') }}" class="btn btn-neon" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;"><i class="fa-solid fa-compass"></i> Discover Movies</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Dynamic Details Modal -->
+<div id="movieModal" class="modal">
+    <div class="modal-content glass-card blur-heavy">
+        <span class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></span>
+        <div class="modal-bg" id="modalBg"></div>
+        <div class="modal-info">
+            <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+                <div id="modalPosterContainer" style="flex-shrink: 0; width: 140px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.2);">
+                    <img id="modalPosterImg" src="" alt="Poster" style="width: 100%; height: auto; display: block;">
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <h2 id="modalTitle">Movie Title</h2>
+                    <div class="hero-meta" style="margin-bottom: 20px;">
+                        <span class="rating glow-text"><i class="fa-solid fa-star"></i> <span id="modalRating">9.0</span></span>
+                        <span class="year" id="modalYear">2024</span>
+                    </div>
+                    <p id="modalOverview">Movie plot description goes here...</p>
+                    <div class="hero-buttons" style="margin-top: 30px; display:flex; gap:15px; flex-wrap:wrap;">
+                        <button class="btn btn-neon" id="modalTrailerBtn"><i class="fa-solid fa-play"></i> Watch Trailer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Alert -->
+<div id="toast" class="cinespark-toast">
+    <i class="fa-solid fa-circle-check" style="color:var(--accent-cyan); font-size:1.2rem;"></i>
+    <span id="toastMsg">Action successful</span>
+</div>
+
+<script>
+    function showToast(msg, icon = 'fa-circle-check') {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMsg').innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    async function removeWatchlist(title, btn) {
+        try {
+            const res = await fetch('/api/watchlist/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: title })
+            });
+            const data = await res.json();
+            if (data.status === 'removed') {
+                const card = btn.closest('.movie-card');
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => { card.remove(); }, 300);
+                showToast(`"${title}" removed from Watchlist`);
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    async function removeFavorite(title, btn) {
+        try {
+            const res = await fetch('/api/favorite/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: title })
+            });
+            const data = await res.json();
+            if (data.status === 'removed') {
+                const card = btn.closest('.movie-card');
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => { card.remove(); }, 300);
+                showToast(`"${title}" removed from Liked Movies`);
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    async function watchTrailer(title) {
+        document.body.style.cursor = 'wait';
+        try {
+            const res = await fetch('/api/trailer/' + encodeURIComponent(title));
+            const data = await res.json();
+            
+            if (data.videoId) {
+                const videoModalHtml = `
+                    <div id="videoModalOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:99999; display:flex; justify-content:center; align-items:center; opacity:0; transition:opacity 0.3s ease;">
+                        <iframe style="width:80%; max-width:1200px; aspect-ratio:16/9; border-radius:12px; box-shadow:0 0 40px var(--accent-pink);" src="https://www.youtube.com/embed/${data.videoId}?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <span onclick="this.parentElement.remove()" style="position:absolute; top:30px; right:40px; color:#fff; font-size:40px; cursor:pointer; text-shadow:0 0 10px #fff;"><i class="fa-solid fa-xmark"></i></span>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', videoModalHtml);
+                setTimeout(() => { document.getElementById('videoModalOverlay').style.opacity = '1'; }, 10);
+            } else {
+                window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(title + ' official trailer'), '_blank');
+            }
+        } catch(e) {
+            console.error(e);
+            window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(title + ' official trailer'), '_blank');
+        } finally {
+            document.body.style.cursor = 'default';
+        }
+    }
+
+    function openModal(title, poster, backdrop, overview, rating, year) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalOverview').innerText = overview;
+        document.getElementById('modalRating').innerText = rating;
+        document.getElementById('modalYear').innerText = year;
+        
+        const posterContainer = document.getElementById('modalPosterContainer');
+        const posterImg = document.getElementById('modalPosterImg');
+        if (poster && poster !== 'undefined' && poster !== '') {
+            posterImg.src = poster;
+            posterContainer.style.display = 'block';
+        } else {
+            posterContainer.style.display = 'none';
+        }
+
+        document.getElementById('modalTrailerBtn').onclick = function() {
+            watchTrailer(title);
+        };
+        
+        document.getElementById('modalBg').style.backgroundImage = "linear-gradient(to top, rgba(15,10,25,1), rgba(15,10,25,0.8), transparent), url('" + backdrop + "')";
+        
+        const modal = document.getElementById('movieModal');
+        modal.style.display = 'flex';
+        setTimeout(() => { modal.style.opacity = '1'; }, 10);
+        document.body.style.overflow = 'hidden'; 
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('movieModal');
+        modal.style.opacity = '0';
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+        document.body.style.overflow = 'auto';
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('movieModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>
