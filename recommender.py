@@ -10,8 +10,9 @@ import api_services
 
 print("[ML ENGINE] Loading dataset and building vector space...")
 
-# 1. Load Dataset
-movies = pd.read_csv("movies_metadata.csv", low_memory=False)
+# 1. Load Dataset with only needed columns to keep memory ultra low (<512MB RAM)
+needed_cols = ["title", "poster_path", "overview", "tagline", "vote_average", "vote_count", "popularity", "genres", "release_date"]
+movies = pd.read_csv("movies_metadata.csv", low_memory=False, usecols=lambda c: c in needed_cols)
 
 # 2. Clean & Preprocess
 movies = movies.dropna(subset=["title", "poster_path"])
@@ -22,6 +23,10 @@ movies["tagline"] = movies["tagline"].fillna("").astype(str)
 movies["vote_average"] = pd.to_numeric(movies["vote_average"], errors="coerce").fillna(0)
 movies["vote_count"] = pd.to_numeric(movies["vote_count"], errors="coerce").fillna(0)
 movies["popularity"] = pd.to_numeric(movies["popularity"], errors="coerce").fillna(0)
+
+# Render RAM Optimization: Keep top 25,000 most popular/voted movies so memory stays under 250MB
+if len(movies) > 25000:
+    movies = movies.sort_values(by=["vote_count", "popularity"], ascending=False).head(25000).reset_index(drop=True)
 
 def parse_genres(obj):
     try:
@@ -54,7 +59,8 @@ movies["content_soup"] = (
     movies["overview"]
 )
 
-tfidf = TfidfVectorizer(stop_words="english", max_features=12000, ngram_range=(1, 2))
+# Reduced max_features to 5000 for faster boot and ultra-low RAM footprint
+tfidf = TfidfVectorizer(stop_words="english", max_features=5000)
 tfidf_matrix = tfidf.fit_transform(movies["content_soup"])
 
 # Pre-calculate index mapping for fast lookups
